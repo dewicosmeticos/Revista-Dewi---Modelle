@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dewi Cosméticos &amp; Perfumaria Premium — Revista Digital</title>
+<meta name="description" content="Revista digital Dewi Cosméticos & Perfumaria Premium">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-1:#F4EEE2;
+    --bg-2:#EADFC9;
+    --card:#FFFDF8;
+    --card-border:#E3D2A6;
+    --gold-deep:#8A6A23;
+    --gold:#B68A3B;
+    --gold-light:#D9B96A;
+    --ink:#2E2A22;
+    --muted:#8A7A5C;
+  }
+
+  *{box-sizing:border-box;}
+
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:32px 18px;
+    font-family:'Jost', sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(circle at 15% 10%, rgba(217,185,106,0.25), transparent 45%),
+      radial-gradient(circle at 90% 85%, rgba(217,185,106,0.25), transparent 45%),
+      linear-gradient(160deg, var(--bg-1) 0%, var(--bg-2) 100%);
+    background-attachment:fixed;
+  }
+
+  .card{
+    width:100%;
+    max-width:440px;
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:18px;
+    padding:48px 36px 38px;
+    text-align:center;
+    box-shadow:0 25px 60px -20px rgba(138,106,35,0.25), 0 2px 8px rgba(0,0,0,0.03);
+    opacity:0;
+    transform:translateY(14px);
+    animation:rise 0.7s ease-out 0.1s forwards;
+  }
+
+  @keyframes rise{
+    to{opacity:1; transform:translateY(0);}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .card{animation:none; opacity:1; transform:none;}
+  }
+
+  .logo{
+    width:auto;
+    max-width:140px;
+    height:auto;
+    margin:0 auto 18px;
+    display:block;
+  }
+
+  .tagline{
+    margin:14px 0 0;
+    font-size:12px;
+    font-weight:500;
+    letter-spacing:3.5px;
+    color:var(--gold-deep);
+    text-transform:uppercase;
+  }
+
+  .divider{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    margin:22px 0 26px;
+  }
+  .divider .line{
+    height:1px;
+    width:64px;
+    background:linear-gradient(90deg, transparent, var(--gold-light));
+  }
+  .divider .line.right{
+    background:linear-gradient(90deg, var(--gold-light), transparent);
+  }
+  .divider .spark{
+    color:var(--gold);
+    font-size:13px;
+  }
+
+  .btn{
+    display:block;
+    text-decoration:none;
+    background:linear-gradient(135deg, var(--gold-light), var(--gold) 55%, var(--gold-deep));
+    color:#FFFCF6;
+    font-family:'Jost', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    padding:18px 0;
+    border-radius:4px;
+    box-shadow:0 12px 24px -10px rgba(138,106,35,0.55);
+    transition:transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .btn:hover{ transform:translateY(-2px); box-shadow:0 16px 28px -10px rgba(138,106,35,0.6); }
+  .btn:focus-visible{ outline:2px solid var(--gold-deep); outline-offset:3px; }
+
+  .download-wrap{
+    margin-top:22px;
+    padding-top:18px;
+    border-top:1px solid #EDE3CC;
+  }
+  .download-link{
+    color:var(--muted);
+    font-size:14px;
+    text-decoration:none;
+    letter-spacing:0.5px;
+    border-bottom:1px solid transparent;
+  }
+  .download-link:hover{ color:var(--gold-deep); border-bottom-color:var(--gold-light); }
+
+  .footer{
+    margin-top:26px;
+    font-size:12px;
+    letter-spacing:3px;
+    color:var(--gold-deep);
+    text-decoration:none;
+  }
+  .footer:hover{ color:var(--gold); }
+</style>
+</head>
+<body>
+
+  <main class="card">
+    <img class="logo" src="dewi-logo.png" alt="Dewi Cosméticos &amp; Perfumaria Premium">
+    <p class="tagline">Cosméticos &amp; Perfumaria Premium</p>
+
+    <div class="divider">
+      <span class="line"></span>
+      <span class="spark">&#10022;</span>
+      <span class="line right"></span>
+    </div>
+
+    <a class="btn" href="revista.pdf" target="_blank" rel="noopener">Ler Revista</a>
+
+    <div class="download-wrap">
+      <a class="download-link" href="revista.pdf" download>Baixar PDF</a>
+    </div>
+
+    <a class="footer" href="https://www.instagram.com/dewicosmeticos" target="_blank" rel="noopener">@DEWICOSMETICOS</a>
+  </main>
+
+</body>
+</html>
