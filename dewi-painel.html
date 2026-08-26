@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Painel de Comandas — Dewi</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #F6F0E4; }
+  * { box-sizing: border-box; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBWeuavwArpb0eOg4mZtk9xqVeEzvTGQ2E",
+    authDomain: "dewi-comandas.firebaseapp.com",
+    projectId: "dewi-comandas",
+    storageBucket: "dewi-comandas.firebasestorage.app",
+    messagingSenderId: "181456659483",
+    appId: "1:181456659483:web:28033fc1a7c303247504be"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useCallback } = React;
+
+const money = (v) =>
+  v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+const formatDate = (iso) => {
+  const d = new Date(iso);
+  return d.toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+function DewiPainelComandas() {
+  const [comandas, setComandas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("todas");
+  const [error, setError] = useState(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const snap = await db.collection("comandas").orderBy("createdAt", "desc").get();
+      const records = snap.docs.map((d) => d.data());
+      setComandas(records);
+    } catch (e) {
+      console.error(e);
+      setError("Não foi possível carregar as comandas agora.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const markStatus = async (code, status) => {
+    setComandas((prev) =>
+      prev.map((c) => (c.code === code ? { ...c, status } : c))
+    );
+    try {
+      await db.collection("comandas").doc(code).update({ status });
+    } catch (e) {
+      load();
+    }
+  };
+
+  const filtered = comandas.filter(
+    (c) => filter === "todas" || c.status === filter
+  );
+
+  const totalGerado = comandas.reduce((s, c) => s + c.total, 0);
+  const totalPago = comandas
+    .filter((c) => c.status === "pago")
+    .reduce((s, c) => s + c.total, 0);
+  const pendentes = comandas.filter((c) => c.status !== "pago").length;
+
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#F6F0E4",
+        fontFamily: "Georgia, 'Times New Roman', serif",
+        color: "#241A12",
+        padding: "20px 16px 60px",
+      }}
+    >
+      <div style={{ maxWidth: 480, margin: "0 auto" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 18,
+          }}
+        >
+          <div>
+            <div style={{ fontSize: 11, letterSpacing: 3, color: "#B8935B" }}>
+              DEWI
+            </div>
+            <div style={{ fontSize: 22, fontWeight: 700 }}>Comandas</div>
+          </div>
+          <button
+            onClick={load}
+            style={{
+              background: "#241A12",
+              color: "#F6F0E4",
+              border: "none",
+              borderRadius: 999,
+              padding: "10px 16px",
+              fontFamily: "inherit",
+              fontSize: 12.5,
+              cursor: "pointer",
+            }}
+          >
+            Atualizar
+          </button>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 10,
+            marginBottom: 18,
+          }}
+        >
+          <div
+            style={{
+              background: "#fff",
+              border: "1px solid #E9DFCB",
+              borderRadius: 12,
+              padding: "14px 12px",
+            }}
+          >
+            <div style={{ color: "#9C7A3C", marginBottom: 6, fontSize: 10.5, letterSpacing: 1 }}>
+              VENDIDO (PAGO)
+            </div>
+            <div style={{ fontSize: 20, fontWeight: 700 }}>{money(totalPago)}</div>
+          </div>
+          <div
+            style={{
+              background: "#fff",
+              border: "1px solid #E9DFCB",
+              borderRadius: 12,
+              padding: "14px 12px",
+            }}
+          >
+            <div style={{ color: "#9C7A3C", marginBottom: 6, fontSize: 10.5, letterSpacing: 1 }}>
+              GERADO NO TOTAL
+            </div>
+            <div style={{ fontSize: 20, fontWeight: 700 }}>{money(totalGerado)}</div>
+          </div>
+        </div>
+
+        <div style={{ fontSize: 12, color: "#6b5f4d", marginBottom: 16 }}>
+          {comandas.length} comanda{comandas.length !== 1 ? "s" : ""} gerada
+          {comandas.length !== 1 ? "s" : ""} · {pendentes} pendente
+          {pendentes !== 1 ? "s" : ""} de pagamento
+        </div>
+
+        <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+          {[
+            ["todas", "Todas"],
+            ["pendente", "Pendentes"],
+            ["pago", "Pagas"],
+          ].map(([key, label]) => (
+            <button
+              key={key}
+              onClick={() => setFilter(key)}
+              style={{
+                flex: 1,
+                padding: "8px 0",
+                borderRadius: 999,
+                border: "1px solid #C9A66B",
+                background: filter === key ? "#241A12" : "transparent",
+                color: filter === key ? "#F6F0E4" : "#241A12",
+                fontFamily: "inherit",
+                fontSize: 12.5,
+                cursor: "pointer",
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {loading && comandas.length === 0 && (
+          <div style={{ textAlign: "center", padding: 40, color: "#9b8b6f" }}>
+            Carregando comandas...
+          </div>
+        )}
+
+        {error && (
+          <div style={{ textAlign: "center", padding: 20, color: "#a33" }}>
+            {error}
+          </div>
+        )}
+
+        {!loading && filtered.length === 0 && !error && (
+          <div style={{ textAlign: "center", padding: 40, color: "#9b8b6f" }}>
+            Nenhuma comanda ainda.
+          </div>
+        )}
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {filtered.map((c) => (
+            <div
+              key={c.code}
+              style={{
+                background: "#fff",
+                border: "1px solid #E9DFCB",
+                borderRadius: 12,
+                padding: 14,
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  marginBottom: 8,
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 700 }}>{c.code}</div>
+                  <div style={{ fontSize: 11, color: "#9b8b6f" }}>
+                    {formatDate(c.createdAt)}
+                  </div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ fontSize: 16, fontWeight: 700 }}>{money(c.total)}</div>
+                  {c.installments > 1 && (
+                    <div style={{ fontSize: 10.5, color: "#9C7A3C" }}>
+                      {c.installments}x de {money(c.total / c.installments)}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div style={{ fontSize: 12, color: "#6b5f4d", marginBottom: 10 }}>
+                {c.items.map((i) => i.name).join(" · ")}
+              </div>
+
+              {c.status === "pago" ? (
+                <div style={{ fontSize: 12, color: "#3d8a5c", fontWeight: 700 }}>
+                  ✓ Pago
+                </div>
+              ) : (
+                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  <div style={{ fontSize: 12, color: "#b8935b", fontWeight: 700 }}>
+                    ⏱ Pendente
+                  </div>
+                  <button
+                    onClick={() => markStatus(c.code, "pago")}
+                    style={{
+                      marginLeft: "auto",
+                      background: "#241A12",
+                      color: "#F6F0E4",
+                      border: "none",
+                      borderRadius: 999,
+                      padding: "6px 14px",
+                      fontFamily: "inherit",
+                      fontSize: 11.5,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Marcar como pago
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<DewiPainelComandas />);
+</script>
+</body>
+</html>
